@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
+import 'components/exchange_rate_card.dart';
+import 'components/dropdown.dart';
+import 'services/coin.dart';
+import 'coin_data.dart';
 
 class PriceScreen extends StatefulWidget {
   @override
@@ -6,6 +11,22 @@ class PriceScreen extends StatefulWidget {
 }
 
 class _PriceScreenState extends State<PriceScreen> {
+
+  String selectedCurrency = 'USD';
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getCurrencyExchange();
+  }
+
+  getCurrencyExchange() async {
+    CoinModel coinModel = new CoinModel();
+    double exchange = await coinModel.getExchangeRate('BTC', 'PHP');
+   return exchange;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,36 +37,47 @@ class _PriceScreenState extends State<PriceScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Padding(
-            padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
-            child: Card(
-              color: Colors.lightBlueAccent,
-              elevation: 5.0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
-                child: Text(
-                  '1 BTC = ? USD',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
+          ExchangeRateCard(
+            cardColor: Colors.lightBlueAccent, 
+            textContent: '1 BTC = ? USD'
+          ),
+          ExchangeRateCard(
+            cardColor: Colors.lightBlueAccent, 
+            textContent: '1 ETH = ? USD'
+          ),
+          ExchangeRateCard(
+            cardColor: Colors.lightBlueAccent, 
+            textContent: '1 LTC = ? USD'
           ),
           Container(
             height: 150.0,
             alignment: Alignment.center,
             padding: EdgeInsets.only(bottom: 30.0),
             color: Colors.lightBlue,
-            child: null,
+            child: (Platform.isAndroid) ? androidDropdown(
+                menuItems: currenciesList, 
+                dropdownBtnValue: selectedCurrency, 
+                onChanged: (currency) {
+                  setState(() {
+                    print(currency);
+                    selectedCurrency = currency;
+                  });
+                }
+              ) : iosPicker(
+                menuItems: currenciesList, 
+                backgroundColor: Colors.lightBlue, 
+                itemExtent: 32.0,
+                onSelectedItemChanged: (selectedIndex){
+                  print(selectedIndex);
+                },
+                textStyle: TextStyle(
+                  color: Colors.white,
+                ),
+            )
           ),
         ],
       ),
     );
   }
 }
+
