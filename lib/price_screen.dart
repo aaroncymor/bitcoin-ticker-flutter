@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
+import 'coin_data.dart';
 import 'components/exchange_rate_card.dart';
 import 'components/dropdown.dart';
 import 'services/coin.dart';
-import 'coin_data.dart';
 
 class PriceScreen extends StatefulWidget {
   @override
@@ -13,18 +13,34 @@ class PriceScreen extends StatefulWidget {
 class _PriceScreenState extends State<PriceScreen> {
 
   String selectedCurrency = 'USD';
+  Map<String, int> exchangeRate = {'BTC': 0, 'ETH': 0, 'LTC': 0};
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    getCurrencyExchange();
+    getCurrencyExchange(selectedCurrency);
   }
 
-  getCurrencyExchange() async {
+  getCurrencyExchange(realCurrency) async {
     CoinModel coinModel = new CoinModel();
-    double exchange = await coinModel.getExchangeRate('BTC', 'PHP');
-   return exchange;
+    
+    // BTC
+    double btcExchangeRate = await coinModel.getExchangeRate('BTC', realCurrency);
+    print(btcExchangeRate);
+
+    // ETH
+    double ethExchangeRate = await coinModel.getExchangeRate('ETH', realCurrency);
+    print(ethExchangeRate);
+
+    // LTC
+    double ltcExchangeRate = await coinModel.getExchangeRate('LTC', realCurrency);
+    print(ltcExchangeRate);
+
+    setState(() {
+      exchangeRate['BTC'] = btcExchangeRate.toInt();
+      exchangeRate['ETH'] = ethExchangeRate.toInt();
+      exchangeRate['LTC'] = ltcExchangeRate.toInt();      
+    });
   }
 
   @override
@@ -35,19 +51,24 @@ class _PriceScreenState extends State<PriceScreen> {
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          ExchangeRateCard(
-            cardColor: Colors.lightBlueAccent, 
-            textContent: '1 BTC = ? USD'
-          ),
-          ExchangeRateCard(
-            cardColor: Colors.lightBlueAccent, 
-            textContent: '1 ETH = ? USD'
-          ),
-          ExchangeRateCard(
-            cardColor: Colors.lightBlueAccent, 
-            textContent: '1 LTC = ? USD'
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              ExchangeRateCard(
+                cardColor: Colors.lightBlueAccent, 
+                textContent: '1 BTC = ${exchangeRate['BTC']} $selectedCurrency'
+              ),
+              ExchangeRateCard(
+                cardColor: Colors.lightBlueAccent, 
+                textContent: '1 ETH = ${exchangeRate['ETH']} $selectedCurrency'
+              ),
+              ExchangeRateCard(
+                cardColor: Colors.lightBlueAccent, 
+                textContent: '1 LTC = ${exchangeRate['LTC']} $selectedCurrency'
+              ),
+            ],
           ),
           Container(
             height: 150.0,
@@ -61,6 +82,7 @@ class _PriceScreenState extends State<PriceScreen> {
                   setState(() {
                     print(currency);
                     selectedCurrency = currency;
+                    getCurrencyExchange(currency);
                   });
                 }
               ) : iosPicker(
@@ -68,12 +90,13 @@ class _PriceScreenState extends State<PriceScreen> {
                 backgroundColor: Colors.lightBlue, 
                 itemExtent: 32.0,
                 onSelectedItemChanged: (selectedIndex){
-                  print(selectedIndex);
+                  selectedCurrency = currenciesList[selectedIndex];
+                  getCurrencyExchange(currenciesList[selectedIndex]);
                 },
                 textStyle: TextStyle(
                   color: Colors.white,
                 ),
-            )
+              )
           ),
         ],
       ),

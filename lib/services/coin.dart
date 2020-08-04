@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 const coinapiEndpoint = 'https://rest.coinapi.io/v1';
-const apiKey = 'CD245C37-9E55-4CEB-AA71-3CCBA66D90F0';
+const apiKey = '';
 
 class CoinModel {
   Future<double> getExchangeRate(String virtualCurrency, String realCurrency) async {
@@ -15,11 +15,11 @@ class CoinModel {
     if (response.statusCode == 200){
       dynamic data = jsonDecode(response.body);
       print(data);
-      return data['rate'];
+      return data['rate'] + 0.0;
     } else {
       print(response.statusCode);
     }
 
-    return 0.0;
+    return 0;
   }
 }
